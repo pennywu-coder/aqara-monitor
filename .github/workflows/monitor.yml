@@ -1,0 +1,40 @@
+name: Aqara AU 社媒监控
+
+on:
+  schedule:
+    - cron: "0 23 * * 0"
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    name: 抓取数据并生成报告
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 安装 Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安装依赖
+        run: pip install requests
+
+      - name: 运行监控脚本
+        env:
+          GOOGLE_ALERTS_RSS: ${{ secrets.GOOGLE_ALERTS_RSS }}
+        run: python monitor/run.py
+
+      - name: 提交报告到仓库
+        run: |
+          git config user.name  "Aqara Monitor Bot"
+          git config user.email "bot@aqara-au-monitor"
+          git add docs/
+          git diff --staged --quiet && echo "No changes" || \
+            git commit -m "📊 Weekly report: $(date -u +%Y-W%W)"
+          git push
