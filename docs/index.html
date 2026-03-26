@@ -3,31 +3,313 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Aqara AU 社媒情报监控</title>
+<title>Aqara AU 社媒情报 · 2026-03-26</title>
 <style>
-  body { background:#0d0f14; color:#e8eaf0; font-family:-apple-system,sans-serif;
-         display:flex; align-items:center; justify-content:center;
-         min-height:100vh; text-align:center; }
-  .box { max-width:480px; }
-  .dot { width:12px; height:12px; background:#00c8a0; border-radius:50%;
-         display:inline-block; margin-bottom:24px;
-         animation:pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-  h1 { font-size:24px; margin-bottom:12px; }
-  p  { color:#8b8fa8; font-size:14px; line-height:1.7; }
-  code { background:#1a1e28; padding:2px 8px; border-radius:4px;
-         font-size:12px; color:#00c8a0; }
+:root{--bg:#0d0f14;--bg2:#13161e;--bg3:#1a1e28;
+  --border:rgba(255,255,255,0.08);
+  --text:#e8eaf0;--text2:#8b8fa8;--text3:#555a70;
+  --green:#00c8a0;--orange:#f5a623;--red:#ff6b6b;--blue:#0090ff;
+  --font:-apple-system,"PingFang SC","Noto Sans SC",sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.6;}
+a{color:var(--text);text-decoration:none;}
+a:hover{color:var(--green);}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:14px 28px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;}
+.brand{font-size:13px;font-weight:600;color:var(--green);letter-spacing:.05em;}
+.meta{font-size:11px;color:var(--text3);font-family:monospace;}
+.dot{width:7px;height:7px;background:var(--green);border-radius:50%;
+  display:inline-block;margin-right:6px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.layout{display:grid;grid-template-columns:210px 1fr;min-height:calc(100vh - 49px);}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);
+  padding:20px 0;position:sticky;top:49px;height:calc(100vh - 49px);overflow-y:auto;}
+.sidebar a{display:block;padding:7px 20px;font-size:12px;color:var(--text3);
+  border-left:2px solid transparent;transition:all .15s;}
+.sidebar a:hover,.sidebar a.active{color:var(--text);border-left-color:var(--green);
+  background:rgba(0,200,160,.05);}
+.shead{font-size:10px;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;
+  padding:14px 20px 4px;}
+.main{padding:32px;overflow-y:auto;}
+.psec{margin-bottom:44px;scroll-margin-top:60px;}
+.ptitle{font-size:20px;font-weight:600;margin-bottom:3px;}
+.pdesc{font-size:12px;color:var(--text2);margin-bottom:18px;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.stat-val{font-size:22px;font-weight:600;color:var(--green);}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:2px;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;
+  padding:13px 15px;margin-bottom:9px;transition:border-color .15s;}
+.card:hover{border-color:rgba(255,255,255,.15);}
+.card-title{font-size:13px;font-weight:500;line-height:1.4;display:block;margin-bottom:5px;}
+.card-meta{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--text3);
+  margin-top:7px;font-family:monospace;}
+.sub-group{margin-bottom:18px;}
+.sub-label{font-size:11px;font-family:monospace;color:var(--green);
+  letter-spacing:.06em;margin-bottom:7px;padding:3px 0;border-bottom:1px solid var(--border);}
+.kw-section{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.kw-row{display:flex;align-items:center;gap:12px;padding:5px 0;
+  border-bottom:1px solid rgba(255,255,255,.04);}
+.kw-row:last-child{border:none;}
+.kw-name{font-family:monospace;font-size:12px;width:160px;color:var(--text);flex-shrink:0;}
+.kw-bar-wrap{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.kw-bar{height:100%;background:var(--green);border-radius:3px;}
+.kw-count{font-family:monospace;font-size:12px;color:var(--green);width:32px;text-align:right;}
+.badge{font-size:10px;padding:2px 8px;border-radius:4px;font-family:monospace;font-weight:600;}
+.badge-new{background:rgba(0,200,160,.15);color:var(--green);}
+.badge-hot{background:rgba(255,107,107,.15);color:var(--red);}
+.badge-au{background:rgba(0,144,255,.15);color:var(--blue);}
+.empty{color:var(--text3);font-size:12px;padding:10px 0;}
+.note{font-size:12px;color:var(--text2);line-height:1.7;background:var(--bg2);
+  border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-top:12px;}
+.note code{background:var(--bg3);padding:1px 6px;border-radius:3px;
+  font-size:11px;color:var(--green);font-family:monospace;}
+@media(max-width:700px){
+  .layout{grid-template-columns:1fr;}
+  .sidebar{display:none;}
+  .stat-grid{grid-template-columns:1fr 1fr;}
+}
 </style>
 </head>
 <body>
-<div class="box">
-  <div class="dot"></div>
-  <h1>Aqara AU 社媒情报监控</h1>
-  <p>系统已部署，等待首次运行。</p>
-  <p style="margin-top:16px">
-    前往 <code>Actions</code> 标签页 → 点击
-    <code>Run workflow</code> 立即生成第一份报告。
-  </p>
+<div class="topbar">
+  <div class="brand"><span class="dot"></span>AQARA AU · 社媒情报监控</div>
+  <div class="meta">第 12 周 &nbsp;·&nbsp; 2026-03-26 更新
+    &nbsp;·&nbsp; Reddit · Whirlpool · Homeone · Google News</div>
 </div>
+<div class="layout">
+  <nav class="sidebar">
+    <div class="shead">本周概览</div>
+    <a href="#overview">📊 数据摘要</a>
+    <a href="#keywords">🔍 关键词热度</a>
+    <div class="shead">Reddit</div>
+    <a href="#reddit-new">🆕 最新帖子</a>
+    <a href="#reddit-top">🔥 本周热门</a>
+    <div class="shead">澳洲论坛</div>
+    <a href="#wp-aqara">🌀 Whirlpool · Aqara</a>
+    <a href="#wp-forum">🏠 Whirlpool · Smart Home</a>
+    <a href="#homeone">🏗 Homeone</a>
+    <div class="shead">媒体 / 全网</div>
+    <a href="#google-news">📰 Google News AU</a>
+    
+    <div class="shead">关于</div>
+    <a href="#about">ℹ️ 说明</a>
+  </nav>
+  <main class="main">
+
+    <div class="psec" id="overview">
+      <div class="ptitle">本周数据摘要</div>
+      <div class="pdesc">第 12 周 · 2026-03-26</div>
+      <div class="stat-grid">
+        <div class="stat"><div class="stat-val">0</div><div class="stat-lbl">Reddit 最新（含aqara）</div></div>
+        <div class="stat"><div class="stat-val">0</div><div class="stat-lbl">Reddit 本周热门</div></div>
+        <div class="stat"><div class="stat-val">8</div><div class="stat-lbl">Whirlpool 帖子</div></div>
+        <div class="stat"><div class="stat-val">10</div><div class="stat-lbl">Homeone + 媒体报道</div></div>
+      </div>
+    </div>
+
+    <div class="psec" id="keywords">
+      <div class="ptitle">关键词热度 Top 15</div>
+      <div class="pdesc">近3个月 Reddit 帖子中关键词出现次数（自动累积）</div>
+      <div class="kw-section"><div class="empty">暂无数据</div></div>
+    </div>
+
+    <div class="psec" id="reddit-new">
+      <div class="ptitle">Reddit · 最新帖 <span class="badge badge-new">NEW</span></div>
+      <div class="pdesc">各 subreddit 最新含 aqara 关键词的讨论</div>
+      <div class="empty">本周暂无</div>
+    </div>
+
+    <div class="psec" id="reddit-top">
+      <div class="ptitle">Reddit · 本周热门 <span class="badge badge-hot">HOT</span></div>
+      <div class="pdesc">本周点赞和评论最多的 Aqara 相关讨论</div>
+      <div class="empty">本周暂无</div>
+    </div>
+
+    <div class="psec" id="wp-aqara">
+      <div class="ptitle">Whirlpool · Aqara 搜索 <span class="badge badge-au">AU</span></div>
+      <div class="pdesc">forums.whirlpool.net.au 搜索 "aqara" 的最新结果</div>
+      <div class="empty">本期暂无内容</div>
+    </div>
+
+    <div class="psec" id="wp-forum">
+      <div class="ptitle">Whirlpool · Smart Home 版块 <span class="badge badge-au">AU</span></div>
+      <div class="pdesc">Smart Home 版块最新帖子（不限 Aqara）</div>
+      
+    <div class="card">
+      <a href="https://forums.whirlpool.net.au/thread/3npqkrr3" target="_blank" class="card-title">Seriously... whats a graduate program?</a>
+      <div class="card-meta">
+        <span>Whirlpool</span>
+        
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://forums.whirlpool.net.au/thread/3yqm4rpn" target="_blank" class="card-title">NOTE – Employers May Read Your Posts</a>
+      <div class="card-meta">
+        <span>Whirlpool</span>
+        
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://forums.whirlpool.net.au/thread/3qrrryk5" target="_blank" class="card-title">KPMG 2027 Graduate Program</a>
+      <div class="card-meta">
+        <span>Whirlpool</span>
+        
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://forums.whirlpool.net.au/thread/31mmmr2j" target="_blank" class="card-title">Telstra 2027 Graduate Experience Program</a>
+      <div class="card-meta">
+        <span>Whirlpool</span>
+        
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://forums.whirlpool.net.au/thread/92444zl5" target="_blank" class="card-title">VicRoads 2026 Graduate Program - Cyber Security St</a>
+      <div class="card-meta">
+        <span>Whirlpool</span>
+        
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://forums.whirlpool.net.au/thread/3l1112zl" target="_blank" class="card-title">Westpac 2027 Grad Program</a>
+      <div class="card-meta">
+        <span>Whirlpool</span>
+        
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://forums.whirlpool.net.au/thread/3xvvvypq" target="_blank" class="card-title">Investment Banking Internships 2026/27</a>
+      <div class="card-meta">
+        <span>Whirlpool</span>
+        
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://forums.whirlpool.net.au/thread/9l111xrx" target="_blank" class="card-title">Macquarie Grad Program 2027</a>
+      <div class="card-meta">
+        <span>Whirlpool</span>
+        
+      </div>
+    </div>
+    </div>
+
+    <div class="psec" id="homeone">
+      <div class="ptitle">Homeone · Home Automation <span class="badge badge-au">AU</span></div>
+      <div class="pdesc">澳洲最大建房论坛的 Home Automation 版块</div>
+      <div class="empty">本期暂无内容</div>
+    </div>
+
+    <div class="psec" id="google-news">
+      <div class="ptitle">Google News AU · 媒体报道</div>
+      <div class="pdesc">澳洲媒体对 Aqara 的最新报道（Google News RSS）</div>
+      
+    <div class="card">
+      <a href="https://news.google.com/rss/articles/CBMiggFBVV95cUxOZzg3bkNnLU90Q29VczNCcTk2dXBtbVRDUndXamZxZEtBLVQ0S1FQcjJqXzdwQ0ZBUEtyZzBSWjJwUUFEVHo4R1dKNXRnTWZlWG1aY3FIbnVWTU40T3czN0FDbzhGaGNSdy1SVzdtbDZYY3BzWFM1dVhqYmEtTkhZTldn?oc=5" target="_blank" class="card-title">Aqara’s new smart lock is the first to use Apple’s hands-free unlocking - WhistleOut</a>
+      <div class="card-meta">
+        <span>Google News · WhistleOut</span>
+        <span>Mon, 12 Ja</span>
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://news.google.com/rss/articles/CBMieEFVX3lxTE85Z1prdGxOek13OWVpTzFLRm9nMUMwbTVJOC02ZW5naDlKdjF5MmFYVWRqNEVoWm9EMjJGeUpqRnUzYXgzRm90ZHZWdEJ3bWFiVEJ5VjB2dVJNZ1dzZjJZRV9HeklSMGxRWXR4Qi1la01MNGVsTUVQWg?oc=5" target="_blank" class="card-title">How I set up a smart home (and what I learned along the way) - GadgetGuy</a>
+      <div class="card-meta">
+        <span>Google News · GadgetGuy</span>
+        <span>Thu, 08 Ja</span>
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://news.google.com/rss/articles/CBMirAFBVV95cUxQS0p3QTdXZ0lmQU1jZ00tczJ4LURrX090YkdvNWFwSFpUMjJZM0VBVUdNS0dpeXR3bmt1cHZiU1k1ZU5STmxfVjN3S0JCT3gxcWZ2WldUOTduUE5rcVRGdmhSaXlvS2N4STBHRUlEZ09yVkVKbnlZcXd0alktY3lvSV90X3UtSk5RV2ZETUEtLW9lbXdaRUtpSjdmRGdUT09tVEdURldkbF9Qbi1o?oc=5" target="_blank" class="card-title">The superb night-vision security camera that barks like a dog - AFR</a>
+      <div class="card-meta">
+        <span>Google News · AFR</span>
+        <span>Tue, 09 De</span>
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://news.google.com/rss/articles/CBMifkFVX3lxTE4yNzZSVzhvdDExMThlNm5Odnd6MElOd05IWjcyb1U4eDQ0NGNxUWVmVHQxUy1uNVZqRFJzanRfU1VLWXJGTmQ0STBPZjVvS0ZndjVOZjR0ZWhMVEpkYzNEc192QmVNY3U2SnlqUVZVenprdzU4UjNMMVFIb3FCdw?oc=5" target="_blank" class="card-title">Aqara Camera Hub G5 Pro - Review 2025 - PCMag Australia</a>
+      <div class="card-meta">
+        <span>Google News · PCMag Australia</span>
+        <span>Thu, 29 Ma</span>
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://news.google.com/rss/articles/CBMifEFVX3lxTFBHbWNIRVVJWl9LenBwa24wQnBtY1VORzdRWS10cFA3OVRLUVlLZWVUcTE5RXFTNlZJSEVJMGx4MzFYRnhnQ3E1bTBDTi12UmFYNlljNFZWSThGdzNrbFhaX00tN1NOTkc0dVdtVWdSLXVuOWJWX2NDb0p6QVo?oc=5" target="_blank" class="card-title">Aqara Smart Home Sale Drops Prices by Up to 34% for Locks, Cameras and More at Amazon Spring Sale - CNET</a>
+      <div class="card-meta">
+        <span>Google News · CNET</span>
+        <span>Wed, 25 Ma</span>
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://news.google.com/rss/articles/CBMikgFBVV95cUxNYm1NV1Vpcl9tNk53dU1tYl9OMXU4dVVQWWs1aDBUS0o1b3dyeWpGaXRETm9BUkF0ZnZJaGlUNDVjajJJSUQxaVoyX2hJcUt0Y21GQl82ZnRJY2k5aVNob0pBbVI0NlJYOElOeGJPZF94Zkd6SmZYbEZiUUkzZHFpX0xpVHRhMC1iS2RaRjRiVE13UQ?oc=5" target="_blank" class="card-title">Two Lenses and a Smart Home Hub in One Tiny Camera - The Gadgeteer</a>
+      <div class="card-meta">
+        <span>Google News · The Gadgeteer</span>
+        <span>Fri, 20 Ma</span>
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://news.google.com/rss/articles/CBMibkFVX3lxTE4zQzJLMnZtU09KUEszWEk0RFUtTEJodGdxMEVMWFVkb000Zm5VVC1PNi12dU5nd09jRFZFYzVEMk5QXzdqbjZlLTM4Vko2RE5NZktFR2hCQWw4UzRTYjdHRmJjZjMyc2dVcjVrRlRn?oc=5" target="_blank" class="card-title">Outfit your Apple Home with Aqara doorbells, sensors, more from $15 during Amazon's Big Spring Sale (Up to 34% off) - 9to5Toys</a>
+      <div class="card-meta">
+        <span>Google News · 9to5Toys</span>
+        <span>Wed, 25 Ma</span>
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://news.google.com/rss/articles/CBMic0FVX3lxTE1QV083NVp1RkU1dHQxdkxob05YZ2RhWWxkclBGTGRmWlFfbEd0bUVjRzQwcUxSMnNHYUZ0b1ptV25MVThmUjJIMDctUF9RR0ZnVjhVdFJ6aEF6S1V5WmF3OGxNLUgyTW9zUUFpRXVNVkVrOVU?oc=5" target="_blank" class="card-title">Aqara G410 video doorbell review: One for the HomeKit heads - WhistleOut</a>
+      <div class="card-meta">
+        <span>Google News · WhistleOut</span>
+        <span>Tue, 02 De</span>
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://news.google.com/rss/articles/CBMimgFBVV95cUxQSHpJRmV3dGR2YXNIcW85V3hqbldSeFN1TXo3Yzl0VXF0VFcydjRsbmhla3QxdGpJcGl6MXJ3aUxOdTI2TXpvUlBWOFVIcWhsUDgwRnJvSnlUdjZiem1JR0NvbURTUWlEdUFRRUlhSWxDbW5BNFp3eEZnamtMN2dZaThzdUx0QnJabHJRUDY0THozOS1OY1BwS0pn?oc=5" target="_blank" class="card-title">Aqara Smart Lock U300 Lever Lock Wins Australian Good Design Award for Smart Home Security - Digital Reviews Network</a>
+      <div class="card-meta">
+        <span>Google News · Digital Reviews Network</span>
+        <span>Wed, 15 Oc</span>
+      </div>
+    </div>
+    <div class="card">
+      <a href="https://news.google.com/rss/articles/CBMikAFBVV95cUxNVHdIWXZzS1o5OG9abUNzN2h1MkVMd3JKbGZLcGpSTW5VRGZ1VktqVlBlMEh3T3l3Q0MtZnBzUmd6ZTlQQzVWejVYdE1YbWctRHFFci1wejYzcVZDczFBc2VTanZvSWxoWXNicEVGTmJIeXhTVWpGbWtjaF9qQ3pUb3IzcFpvY1oySGU4T1h4aU8?oc=5" target="_blank" class="card-title">The Best Outdoor Home Security Cameras for 2026 - PCMag Australia</a>
+      <div class="card-meta">
+        <span>Google News · PCMag Australia</span>
+        <span>Tue, 03 Ma</span>
+      </div>
+    </div>
+    </div>
+
+    
+
+    <div class="psec" id="about">
+      <div class="ptitle">关于</div>
+      <div class="note">
+        本页面由 GitHub Actions 每周一早9点（悉尼时间）自动更新，无需 Reddit API Key。<br>
+        数据来源：Reddit 公开接口 · Whirlpool · Homeone · Google News AU<br>
+        历史数据存于 <code>docs/data/</code>，关键词趋势自动累积。<br>
+        手动刷新：GitHub → Actions → Run workflow。
+        <br><br>
+        <strong>可选增强：</strong>设置 Google Alerts RSS 后，在仓库 Settings → Secrets 添加
+        <code>GOOGLE_ALERTS_RSS</code>（填入你的 Alerts RSS URL），下次运行自动抓取。
+      </div>
+    </div>
+
+  </main>
+</div>
+<script>
+const secs = document.querySelectorAll('.psec[id]');
+const links = document.querySelectorAll('.sidebar a');
+new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) links.forEach(a =>
+      a.classList.toggle('active', a.getAttribute('href')==='#'+e.target.id));
+  });
+}, {rootMargin:'-30% 0px -65% 0px'}).observe || secs.forEach(s => s);
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) links.forEach(a =>
+      a.classList.toggle('active', a.getAttribute('href')==='#'+e.target.id));
+  });
+}, {rootMargin:'-30% 0px -65% 0px'});
+secs.forEach(s => io.observe(s));
+</script>
 </body>
 </html>
