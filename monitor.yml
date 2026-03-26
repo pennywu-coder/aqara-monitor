@@ -1,0 +1,61 @@
+# .github/workflows/monitor.yml
+#
+# 每周一早上9点（悉尼时间 AEST = UTC+10）自动运行
+# 也可以在 GitHub 网页上手动点 "Run workflow" 立刻触发
+#
+# 运行内容：
+#   1. 抓取 Reddit 5个 subreddit 的最新帖 + 本周热帖
+#   2. 抓取 Whirlpool aqara 相关帖 + Smart Home 版块新帖
+#   3. 统计关键词频率，累积历史数据
+#   4. 生成 docs/index.html 报告页面
+#   5. 自动提交到仓库，GitHub Pages 立刻更新
+
+name: Aqara AU 社媒监控
+
+on:
+  # 每周日 23:00 UTC = 每周一 09:00 AEST（悉尼夏令时 UTC+11 时为 10:00）
+  schedule:
+    - cron: "0 23 * * 0"
+
+  # 允许在 GitHub 网页手动触发
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    name: 抓取数据并生成报告
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # 需要写权限才能提交报告文件
+    permissions:
+      contents: write
+
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+
+      - name: 安装 Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安装依赖
+        run: pip install requests
+
+      - name: 运行监控脚本
+        env:
+          # 这两个值在仓库的 Settings → Secrets → Actions 里设置
+          # 如果没有设置，脚本会用匿名访问（有限速，但可以运行）
+          REDDIT_CLIENT_ID:     ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+        run: python monitor/run.py
+
+      - name: 提交报告到仓库
+        run: |
+          git config user.name  "Aqara Monitor Bot"
+          git config user.email "bot@aqara-au-monitor"
+          git add docs/
+          # 如果没有变化就跳过提交
+          git diff --staged --quiet && echo "No changes" || \
+            git commit -m "📊 Weekly report: $(date -u +%Y-W%W)"
+          git push
